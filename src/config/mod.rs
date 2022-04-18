@@ -26,9 +26,10 @@ impl OnagreSettings {
     pub fn get() -> Result<Self> {
         let settings_path = SETTINGS_PATH.lock().unwrap();
         if settings_path.exists() {
-            let mut s = Config::new();
-            s.merge(File::from(settings_path.clone()))?;
-            s.try_into()
+            let s = Config::builder();
+            let s = s.add_source(File::from(settings_path.clone()));
+            s.build()?
+                .try_deserialize()
                 .map_err(|err| anyhow!("{} : {}", "Config format error", err))
         } else {
             Err(anyhow!(
